@@ -1,0 +1,1 @@
+ReactDOM.render(<CreateEventApp />, document.getElementById('CreateEventApp'));
