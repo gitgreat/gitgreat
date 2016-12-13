@@ -1,12 +1,12 @@
 # Project Name
 
-> Pithy project description
+Friends is a collaborative event planner designed to make group event-planning easy. Sign-in to your group's channel, create an event, and start planning details!
 
 ## Team
 
-  - __Product Owner__: teamMember
-  - __Scrum Master__: teamMember
-  - __Development Team Members__: teamMember, teamMember
+  - __Product Owner__: Jenn Kao
+  - __Scrum Master__: Vivian Zhang
+  - __Development Team Members__: Wells Tsai, Tim Chin
 
 ## Table of Contents
 
@@ -37,9 +37,7 @@
 From within the root directory:
 
 ```sh
-sudo npm install -g bower
 npm install
-bower install
 ```
 
 ### Roadmap

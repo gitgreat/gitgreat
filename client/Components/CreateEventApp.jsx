@@ -1,3 +1,5 @@
+//Parent App within createEvent.html
+//Allows users to create new events
 class CreateEventApp extends React.Component {
   constructor(props) {
     super(props);
@@ -23,6 +25,8 @@ class CreateEventApp extends React.Component {
   }
 
   handleEventSubmit(event) {
+    //sends a post request with the event data to the server, which will enter the event into
+    //the eventTable
     var successHandler = function() {
       $('#msg').text('event successfully posted');
     };

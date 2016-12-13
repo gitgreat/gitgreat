@@ -1,3 +1,5 @@
+//Child component within the Event Planning component
+//Allows users to create a list of items that need to be brought to an event;
 class WhatToBring extends React.Component {
   constructor(props) {
     super(props);
@@ -18,6 +20,8 @@ class WhatToBring extends React.Component {
   }
 
   fetchItems() {
+      //The event name is passed along to the server via query parameters 
+    //so that we can display the itemlist associated with a specific event
     var eventParam = this.props.featuredEvent.name.split(' ').join('_');
     var successHandler = function(data) {
       this.setState({itemList: data});
@@ -30,6 +34,8 @@ class WhatToBring extends React.Component {
   }
 
   handleSubmit(event) {
+    //The event name is passed along to the server via query parameters 
+    //so that we can post to the itemlistTable associated with a specific event
     var item = {
       item: this.state.currentItem,
       cost: this.state.currentCost,
@@ -54,13 +60,11 @@ class WhatToBring extends React.Component {
       currentItem: event.target.value
     });
   }
-
   handleOwnerChange(event) {
     this.setState({
       currentOwner: event.target.value
     });
   }
-
   handleCostChange(event) {
     this.setState({
       currentCost: event.target.value
