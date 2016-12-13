@@ -1,3 +1,5 @@
+//Child component contained within HomepageApp
+//Contains the event planning navigation bar
 class EventPlanning extends React.Component {
   constructor(props) {
     super(props);

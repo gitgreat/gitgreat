@@ -1,3 +1,4 @@
+//Dummy data for testing
 var eventData = [
   {
     ID: 1,

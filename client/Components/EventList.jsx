@@ -1,3 +1,5 @@
+//Child component within HomepageApp
+//Will receive the eventList in an array as a prop and will create EventListEntries for each event
 class EventList extends React.Component {
   constructor(props) {
     super(props);
@@ -7,6 +9,9 @@ class EventList extends React.Component {
     };
   }
   componentWillReceiveProps(nextProps) {
+    //This function will sort the events in the eventList into two categories: upcoming and deleted
+    //The sort logic compares the event date with the current date and checks to see if the event 
+    //has already passed.
     if (nextProps.eventData) {
       var upcoming = [];
       var completed = [];

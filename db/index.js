@@ -47,6 +47,7 @@ var ReminderTable = sequelize.define('reminders', {
   },
 });
 
+//Create associations such that ItemListTable and ReminderTable contain eventId
 ItemListTable.belongsTo(EventTable);
 ReminderTable.belongsTo(EventTable);
 

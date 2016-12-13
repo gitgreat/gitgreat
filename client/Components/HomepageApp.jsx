@@ -1,3 +1,6 @@
+//Parent App within homepage.html
+//Allows users to view events, create and view event planning details
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -9,6 +12,8 @@ class App extends React.Component {
     this.handleEntryClick = this.handleEntryClick.bind(this);
   }
   componentDidMount() {
+    //sends a get request to the server to populate the eventList array in this component's state,
+    //which gets passed as a prop into the Eventlist component
     var successHandler = function(data) {
       console.log(data);
       this.setState({eventList: data});
@@ -29,6 +34,9 @@ class App extends React.Component {
 
   render() {
     var view;
+    //view logic: if an event has been clicked on, then the page should view 
+    //the eventDetails page--the EventPlanning component. Otherwise, show the 
+    //homepage--the EventList component.
     if (this.state.page === 'homepage') {
       view = 
         (<div>
