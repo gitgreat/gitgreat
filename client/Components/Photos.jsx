@@ -1,3 +1,5 @@
+import React from 'react';
+
 class Photos extends React.Component {
   constructor(props) {
     super(props);
@@ -6,19 +8,16 @@ class Photos extends React.Component {
     }
   }
   displayPhotos() {
-    console.log('hit displayPhotos function');
     // // ajax get request from server with correct route
     //     // remember to make a new route
     var photoLinks = []
     $.get('/displayImages', function(data) {
       data.forEach(function(el) {
-        console.log(el.url);
         photoLinks.push(el.url);
       });
       this.setState({
         photoUrls: photoLinks
       });
-      console.log(this.state.photoUrls);
       // console.log(photoUrls);
     //   console.log('tessstt:'); //not showing up
     //   this.render();
@@ -77,14 +76,16 @@ class Photos extends React.Component {
     // }
   }
   render() {
-    console.log('calls render');
     this.displayPhotos();
-    return (<div>Photos Tab Stuff Here
-              <form method="post" encType="multipart/form-data" id="uploadForm">
-                <input type="file" id="imageUpload" accept="image/*" multiple /><br/>
-                <input type="submit" value="submit" onClick={(e) => this.uploadFile(e)}/>
-              </form>
-              {this.state.photoUrls.map(link => <img src={link} />)}
-            </div>);
+    return (
+      <div>Photos Tab Stuff Here
+        <form method="post" encType="multipart/form-data" id="uploadForm">
+          <input type="file" id="imageUpload" accept="image/*" multiple /><br/>
+          <input type="submit" value="submit" onClick={(e) => this.uploadFile(e)}/>
+        </form>
+        {this.state.photoUrls.map(link => <img src={link} />)}
+      </div>);
   }
 }
+
+module.exports = Photos;

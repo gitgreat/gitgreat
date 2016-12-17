@@ -1,3 +1,4 @@
+--GTFO
 CREATE DATABASE gitgreat;
 
 USE gitgreat;
@@ -69,6 +70,34 @@ CREATE TABLE `photos` (
  `event` INTEGER,
  `createdAt` VARCHAR(60),
  `updatedAt` VARCHAR(60),
+ PRIMARY KEY (`id`)
+);
+
+-- ---
+-- Table 'Users'
+--
+-- ---
+
+DROP TABLE IF EXISTS `users`;
+
+CREATE TABLE `users` (
+ `id` INTEGER AUTO_INCREMENT,
+ `username` VARCHAR(60),
+ `password` VARCHAR(60),
+ PRIMARY KEY (`id`)
+);
+
+-- ---
+-- Table 'Users'
+--
+-- ---
+
+DROP TABLE IF EXISTS `users`;
+
+CREATE TABLE `users` (
+ `id` INTEGER AUTO_INCREMENT,
+ `username` VARCHAR(60),
+ `password` VARCHAR(60),
  PRIMARY KEY (`id`)
 );
 

@@ -1,62 +1,70 @@
-//Parent App within homepage.html
+//Parent App within index.html
 //Allows users to view events, create and view event planning details
+import React, {PropTypes} from 'react';
+import EventList from './EventList.jsx';
+import EventPlanning from './EventPlanning.jsx';
+import CreateEventApp from './CreateEventApp.jsx';
+import {browserHistory} from 'react-router';
+
+import Navigation from './Navigation.jsx';
+import moment from 'moment';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    App.contextTypes = {user: React.PropTypes.object, authenticated: React.PropTypes.bool}
+
     this.state = {
-      eventList: null,
-      page: 'homepage',
-      featuredEvent: null
-    };
+      featuredEvent: {}, 
+      // user: this.context.user
+    }
+
+
+
     this.handleEntryClick = this.handleEntryClick.bind(this);
+    this.getEventData = this.getEventData.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
+    this.getUser = this.getUser.bind(this);
   }
-  componentDidMount() {
-    //sends a get request to the server to populate the eventList array in this component's state,
-    //which gets passed as a prop into the Eventlist component
-    var successHandler = function(data) {
-      console.log(data);
-      this.setState({eventList: data});
-    };
-    $.ajax({
-      method: 'GET',
-      url: '/eventTable',
-      success: successHandler.bind(this)
-    });
+
+  componentDidMount () {
+    browserHistory.push('/');
+    // console.log(this.context)
+    // console.log(this.context)
+  }
+
+   getUser () {
+    console.log(this.context)
   }
 
   handleEntryClick(event) {
     this.setState({
-      page: 'eventDetails',
-      featuredEvent: event
+      featuredEvent: event,
+    }, function() {
+      browserHistory.push('/planning');
     });
   }
-
+  getEventData(event) {
+    this.setState({
+      featuredEvent: event,
+    }, function() {
+      browserHistory.push('/planning');
+    });
+  }
   render() {
-    var view;
-    //view logic: if an event has been clicked on, then the page should view 
-    //the eventDetails page--the EventPlanning component. Otherwise, show the 
-    //homepage--the EventList component.
-    if (this.state.page === 'homepage') {
-      view = 
-        (<div>
-          <EventList
-            eventData={this.state.eventList}
-            handleEntryClick={this.handleEntryClick}
-          />;
-        </div>);
-    } else if (this.state.page === 'eventDetails') {
-      view = <EventPlanning featuredEvent={this.state.featuredEvent}/>;
-    }
-
     return (
       <div>
-        <Nav />
-        {view}
+        <Navigation />
+        {this.props.children && React.cloneElement(this.props.children, {
+          featuredEvent: this.state.featuredEvent,
+          handleEntryClick: this.handleEntryClick,
+          getEventData: this.getEventData,
+          user: this.context.user
+        })}
       </div>
     );
   }
 }
 
-
-window.App = App;
+module.exports = App;

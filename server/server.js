@@ -1,6 +1,7 @@
 const express = require('express');
 const parser = require('body-parser');
 const url = require('url');
+var stormpath = require('express-stormpath');
 
 const db = require('../db');
 const dbModels = require('../db/index.js');
@@ -8,6 +9,7 @@ const utils = require('./utils.js');
 
 const cloudinary = require('cloudinary');
 const multiparty = require('multiparty');
+var path = require('path');
 
 // Wells's cloudinary api key, replace with your own as this key will be deleted soon
 cloudinary.config({
@@ -20,37 +22,106 @@ const app = express();
 app.use(parser.json());
 
 //serve public folder static files
-app.use(express.static('../public'));
+app.use(express.static(path.join(__dirname, '..', '/public')));
 //serve node_modules via the '/script' virtual file path
 app.use('/scripts', express.static('../node_modules'));
 
+app.use(stormpath.init(app, {
+  apiKey: {
+    id: process.env.STORMPATH_KEY,
+    secret: process.env.STORMPATH_SECRET
+  },
+  application: {
+    href: process.env.STORMPATH_HREF
+  },
+  website: true,
+   web: {
+    produces: ['application/json']
+  }
+}));
+
 app.get('/', function(req, res, next) {
-  res.redirect('/homepage.html');
-});
-app.get('/create', function(req, res, next) {
-  res.redirect('/createEvent.html');
+  res.sendFile(path.join(__dirname, '../public/homepage.html'));
 });
 
 app.post('/eventTable', function(req, res, next) {
-  dbModels.EventTable
-    .create({
+  var location = req.body.location;
+  return dbModels.EventTable.create({
       name: req.body.name,
-      where: req.body.where,
-      when: req.body.when
+      when: req.body.when,
+      // owner: req.body.owner.email
     })
     .then(function(event) {
-      res.redirect('/');
+      dbModels.UsersTable.findOne({where: {email: req.body.owner.email}})
+      .then(function(user) {
+        dbModels.UsersTableEventTable.create({
+          userId: user.dataValues.id,
+          eventId: event.dataValues.id
+        })
+        .then(function () {
+          console.log('OMG WE DID IT!!!!!!!')
+        })
+      })
+    })
+    //NEED TO SPECIFY EMAIL AS FOREIGN KEY
+    .then(function() {
+      dbModels.EventTable.findOne({where: {name: req.body.name}})
+        .then(function(event) {
+          dbModels.LocationTable
+            .create({
+              label: location.label,
+              address: location.address,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              placeID: location.placeID,
+              categories: location.categories,
+              eventId: event.id,
+            })
+            .then(function() {
+              res.sendStatus(200);
+            })
+            .catch(function() {
+              res.sendStatus(400);
+            });
+        })
     })
     .catch(function(err) {
-      console.log('Error: ', err);
+      res.sendStatus(400);
     });
 });
 
 app.get('/eventTable', function(req, res, next) {
-  dbModels.EventTable.findAll({order: [['when', 'DESC']]})
+  dbModels.EventTable.findAll({order: [['when', 'DESC']], include: [dbModels.LocationTable]})
   .then(function(events) {
-    utils.sendResponse(res, 200, 'application/json', events);
+    var result = [];
+    for (var i = 0; i < events.length; i++) {
+      var formattedEvent = {};
+      var event = events[i].dataValues;
+      var location = event.location.dataValues;
+      formattedEvent.name = event.name;
+      formattedEvent.when = event.when;
+      formattedEvent.location = {
+        label: location.label,
+        address: location.address,
+        latitude: parseFloat(location.latitude),
+        longitude: parseFloat(location.longitude),
+        placeID: location.placeID,
+        categories: JSON.parse(location.categories)
+      }
+      result.push(formattedEvent);
+    }
+    utils.sendResponse(res, 200, 'application/json', result);
   });
+});
+
+app.delete('/eventTable', function(req, res, next) {
+  var eventName = url.parse(req.url).query.slice(5).split('_').join(' ');
+  dbModels.EventTable.destroy({where: {name: eventName}})
+    .then(function(event) {
+      console.log('deleted');
+      res.sendStatus(200);
+    });
+  console.log(eventName);
 });
 
 app.post('/itemList', function(req, res, next) {
@@ -87,6 +158,8 @@ app.get('/itemList', function(req, res, next) {
 
 app.post('/reminders', function(req, res, next) {
   var eventName = url.parse(req.url).query.slice(10).split('_').join(' ');
+  console.log(eventName);
+
   dbModels.EventTable.findOne({where: {name: eventName}})
     .then(function(event) {
       var eventId = event.id;
@@ -152,8 +225,29 @@ app.get('/displayImages', function(req, res) {
  });
 });
 
-app.listen(3000, function() {
-  console.log('Server is listening on port 3000');
-});
+app.post('/createAccount', function (req, res) {
+  dbModels.UsersTable.create({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+  })
+   .then(function(event) {
+     console.log('successfully added user to db!!!');
+   })
+   .catch(function(err) {
+     console.log('UsersTable db entry error: ', err);
+   });
+  res.sendStatus(201)
+})
+
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, '..', '/public/homepage.html'));
+})
+
+app.on('stormpath.ready', function () {
+  app.listen(3000, function() {
+    console.log('Server is listening on port 3000');
+  });
+})
 
 module.exports = app;

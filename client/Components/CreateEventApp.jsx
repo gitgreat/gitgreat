@@ -1,3 +1,6 @@
+import React from 'react';
+import {browserHistory} from 'react-router';
+import Geosuggest from 'react-geosuggest';
 //Parent App within createEvent.html
 //Allows users to create new events
 class CreateEventApp extends React.Component {
@@ -6,12 +9,17 @@ class CreateEventApp extends React.Component {
     this.state = {
       name: '',
       when: '',
-      where: ''
+      location: {},
+      owner: this.props.user
     };
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleDateChange = this.handleDateChange.bind(this);
     this.handleLocChange = this.handleLocChange.bind(this);
     this.handleEventSubmit = this.handleEventSubmit.bind(this);
+  }
+
+  componentDidMount () {
+    console.log(this.state.owner)
   }
 
   handleNameChange(event) {
@@ -21,48 +29,59 @@ class CreateEventApp extends React.Component {
     this.setState({when: event.target.value});
   }
   handleLocChange(event) {
-    this.setState({where: event.target.value});
+    this.setState({
+      location: {
+        label: event.label,
+        address: event.gmaps.formatted_address,
+        latitude: event.location.lat,
+        longitude: event.location.lng,
+        placeID: event.placeId,
+        categories: event.gmaps.types
+      }
+    });
   }
-
   handleEventSubmit(event) {
     //sends a post request with the event data to the server, which will enter the event into
     //the eventTable
-    var successHandler = function() {
-      $('#msg').text('event successfully posted');
-    };
-    $.ajax({
-      method: 'POST',
-      url: '/eventTable',
-      contentType: 'application/json',
-      data: JSON.stringify(this.state),
-      success: successHandler.bind(this)
-    });
+    var now = new Date();
+    var eventDate = new Date(this.state.when);
+    eventDate = eventDate.setHours(eventDate.getHours() + 8);
+    if(eventDate >= now) {
+      $.ajax({
+        method: 'POST',
+        url: '/eventTable',
+        contentType: 'application/json',
+        data: JSON.stringify(this.state),
+        success: function(event) {
+          this.props.getEventData(this.state);
+        }.bind(this)
+      });
+    } else {
+      $('#msg').text('event is in the past');
+    }
     event.preventDefault();
-  } 
+  }
   render() {
     return (
       <div>
-        <Nav />
         <div className="featureBody" id="createEvent">
           <form onSubmit={this.handleEventSubmit}>
             <p><label>
-              Name:  
-              <input type="text" name="name" 
+              Name:
+              <input type="text" name="name"
                 value={this.state.name}
                 onChange={this.handleNameChange}/>
             </label></p>
             <p><label>
               Date:
-              <input type="datetime-local" name="date" 
+              <input type="datetime-local" name="date"
                 value={this.state.when}
                 onChange={this.handleDateChange}/>
             </label></p>
             <p><label>
-              Location: 
-              <input type="text" name="location" 
-                value={this.state.where}
-                onChange={this.handleLocChange}/>
+              Location:
             </label></p>
+            <Geosuggest onSuggestSelect={this.handleLocChange}/>
             <input type="submit" value="Submit" />
           </form>
         </div>
@@ -72,4 +91,4 @@ class CreateEventApp extends React.Component {
   }
 }
 
-window.CreateEventApp = CreateEventApp;
+module.exports = CreateEventApp;
